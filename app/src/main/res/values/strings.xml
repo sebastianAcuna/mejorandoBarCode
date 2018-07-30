@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">asignaPaquetes</string>
+    <string name="btn_pick"> Asignar </string>
+    <string name="btn_search"> Buscar Paquete </string>
+    <string name="btn_watch"> Ver lista  </string>
+</resources>

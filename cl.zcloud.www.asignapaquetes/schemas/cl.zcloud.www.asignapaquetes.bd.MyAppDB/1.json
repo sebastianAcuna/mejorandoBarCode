@@ -1,0 +1,95 @@
+{
+  "formatVersion": 1,
+  "database": {
+    "version": 1,
+    "identityHash": "52eb36bb9460065852e6146feb30989a",
+    "entities": [
+      {
+        "tableName": "centro_costo",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_centro_costo` INTEGER NOT NULL, `nombre` TEXT, PRIMARY KEY(`id_centro_costo`))",
+        "fields": [
+          {
+            "fieldPath": "idCC",
+            "columnName": "id_centro_costo",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descCC",
+            "columnName": "nombre",
+            "affinity": "TEXT",
+            "notNull": false
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id_centro_costo"
+          ],
+          "autoGenerate": false
+        },
+        "indices": [],
+        "foreignKeys": []
+      },
+      {
+        "tableName": "paquetes_guardados",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id_paquete_guardado` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `id_cc_guardado` INTEGER NOT NULL, `desc_cc_guardado` TEXT, `etiqueta_guardado` TEXT, `prod_cons` TEXT, `fecha_captura` TEXT, `estado_guardado` INTEGER NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "idPaqueteGuardado",
+            "columnName": "id_paquete_guardado",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "idCCGuardado",
+            "columnName": "id_cc_guardado",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "descCCGuardado",
+            "columnName": "desc_cc_guardado",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "etiquetaGuardado",
+            "columnName": "etiqueta_guardado",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "prodCons",
+            "columnName": "prod_cons",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "fechaCaptura",
+            "columnName": "fecha_captura",
+            "affinity": "TEXT",
+            "notNull": false
+          },
+          {
+            "fieldPath": "estadoGuardado",
+            "columnName": "estado_guardado",
+            "affinity": "INTEGER",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "columnNames": [
+            "id_paquete_guardado"
+          ],
+          "autoGenerate": true
+        },
+        "indices": [],
+        "foreignKeys": []
+      }
+    ],
+    "setupQueries": [
+      "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, \"52eb36bb9460065852e6146feb30989a\")"
+    ]
+  }
+}

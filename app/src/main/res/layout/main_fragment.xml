@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView android:layout_height="match_parent"
+    android:layout_width="match_parent"
+    xmlns:android="http://schemas.android.com/apk/res/android">
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    >
+
+        <include layout="@layout/toolbar"/>
+
+        <TextView
+            android:layout_marginTop="20dp"
+            android:text="Seleccione centro de costo"
+            android:textColor="#000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Spinner
+            android:layout_marginTop="5dp"
+            android:id="@+id/spinner_cc"
+            android:layout_width="match_parent"
+            android:layout_height="66dp"
+            android:padding="5dp"
+            />
+        <TextView
+            android:text="Seleccione produccion/consumo"
+            android:textColor="#000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Spinner
+            android:id="@+id/consumo_produccion"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"/>
+
+        <Button
+            android:enabled="true"
+            android:id="@+id/btn_choice_cc"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:padding="5dp"
+            android:elevation="10dp"
+            android:text="@string/btn_pick" />
+
+
+        <SurfaceView
+            android:id="@+id/camera_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            />
+        <Button
+            android:id="@+id/btn_find_package"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:padding="5dp"
+            android:elevation="10dp"
+            android:text="@string/btn_search" />
+        <EditText
+            android:id="@+id/cont_paquete"
+            android:textSize="27sp"
+            android:textStyle="bold"
+            android:textColor="#000"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <Button
+            android:id="@+id/guardar"
+            android:text="guardar"
+            android:background="#388E3C"
+            android:padding="5dp"
+            android:textColor="#FFF"
+            android:layout_marginBottom="5dp"
+            android:elevation="10dp"
+            android:layout_width="match_parent"
+            android:layout_height="100dp" />
+
+        <Button
+            android:id="@+id/watch_all"
+            android:layout_width="match_parent"
+            android:layout_height="100dp"
+            android:background="#0288D1"
+            android:elevation="10dp"
+            android:textColor="#FFF"
+            android:padding="5dp"
+            android:text="@string/btn_watch" />
+    </LinearLayout>
+</ScrollView>
