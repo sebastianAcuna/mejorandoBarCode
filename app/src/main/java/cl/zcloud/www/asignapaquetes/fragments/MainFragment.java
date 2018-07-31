@@ -1,6 +1,5 @@
 package cl.zcloud.www.asignapaquetes.fragments;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -9,7 +8,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.hardware.Camera;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -24,34 +22,23 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.webkit.URLUtil;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.RelativeLayout;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
-//import com.google.android.gms.vision.CameraSource;
-//import com.google.android.gms.vision.Detector;
-//import com.google.android.gms.vision.barcode.Barcode;
-//import com.google.android.gms.vision.barcode.BarcodeDetector;
+import com.google.android.gms.common.api.CommonStatusCodes;
+import com.google.android.gms.vision.barcode.Barcode;
 import com.google.zxing.integration.android.IntentIntegrator;
 import com.google.zxing.integration.android.IntentResult;
-//import com.journeyapps.barcodescanner.camera.CameraSurface;
-
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -61,10 +48,8 @@ import java.util.Objects;
 
 import cl.zcloud.www.asignapaquetes.MainActivity;
 import cl.zcloud.www.asignapaquetes.R;
-import cl.zcloud.www.asignapaquetes.bd.MyAppDB;
 import cl.zcloud.www.asignapaquetes.clases.CentroCosto;
 import cl.zcloud.www.asignapaquetes.clases.GSON.RespuestaCentroCosto;
-import cl.zcloud.www.asignapaquetes.clases.VerificarInternet;
 import cl.zcloud.www.asignapaquetes.clases.paquetesGuardados;
 import cl.zcloud.www.asignapaquetes.retrofit.APIService;
 import cl.zcloud.www.asignapaquetes.retrofit.RetrofitClient;
@@ -89,6 +74,10 @@ public class MainFragment extends Fragment {
     private EditText cont_paquete;
     private int idCCSave;
     private String descCCSave, etiqueta;
+
+
+    private static final int RC_BARCODE_CAPTURE = 9001;
+    private static final String TAG = "BarcodeMain";
 
 
 //    private CameraSurface cameraSurface;
@@ -174,9 +163,10 @@ public class MainFragment extends Fragment {
         btnSearch.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                scannerQR(v);
+//                scannerQR(v);
 //                initQR();
 //                initQR2();
+                readBarCode();
             }
 
         });
@@ -210,6 +200,138 @@ public class MainFragment extends Fragment {
         });
 
         return view;
+    }
+
+    public void readBarCode(){
+        Intent intent = new Intent(getActivity(), BarcodeCaptureFragment.class);
+        startActivityForResult(intent, RC_BARCODE_CAPTURE);
+    }
+
+    /**
+     * Called when an activity you launched exits, giving you the requestCode
+     * you started it with, the resultCode it returned, and any additional
+     * data from it.  The <var>resultCode</var> will be
+     * {@link #RESULT_CANCELED} if the activity explicitly returned that,
+     * didn't return any result, or crashed during its operation.
+     * <p/>
+     * <p>You will receive this call immediately before onResume() when your
+     * activity is re-starting.
+     * <p/>
+     *
+     * @param requestCode The integer request code originally supplied to
+     *                    startActivityForResult(), allowing you to identify who this
+     *                    result came from.
+     * @param resultCode  The integer result code returned by the child activity
+     *                    through its setResult().
+     * @param data        An Intent, which can return result data to the caller
+     *                    (various data can be attached to Intent "extras").
+     * @see #startActivityForResult
+     * @see #createPendingResult
+     * @see #setResult(int)
+     */
+
+    @Override
+    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (requestCode == RC_BARCODE_CAPTURE) {
+            if (resultCode == CommonStatusCodes.SUCCESS) {
+                if (data != null) {
+                    Barcode barcode = data.getParcelableExtra(BarcodeCaptureFragment.BarcodeObject);
+
+                    int type = barcode.valueFormat;
+
+
+                    switch (type) {
+                        case Barcode.CONTACT_INFO:
+                            Log.i(TAG, barcode.contactInfo.title);
+                            Barcode.Email[] set = barcode.contactInfo.emails;
+                            List<String> answers = new ArrayList<String>();
+                            for (int i = 0; i < set.length; i++){
+                                answers.add(set[i].address);
+
+                                Toast.makeText(getActivity(), "emails " + answers, Toast.LENGTH_LONG).show();
+                            }
+                            System.out.println("SOUT UNO " + barcode.contactInfo.organization);
+                            System.out.println("SOUT DOS " + barcode.contactInfo.title);
+                            Barcode.PersonName name = barcode.contactInfo.name;
+                            String contactName = name.first + " " + name.last;
+                            System.out.println("SOUT TRES " + contactName);
+                            break;
+                        case Barcode.EMAIL:
+                            cont_paquete.setText(barcode.email.address);
+                            etiqueta = barcode.email.address;
+                            Log.i(TAG, barcode.email.address);
+                            break;
+                        case Barcode.ISBN:
+                            cont_paquete.setText(barcode.rawValue);
+                            etiqueta = barcode.rawValue;
+                            Log.i(TAG, barcode.rawValue);
+                            break;
+                        case Barcode.PHONE:
+                            cont_paquete.setText(barcode.phone.number);
+                            etiqueta = barcode.phone.number;
+                            Log.i(TAG, barcode.phone.number);
+                            break;
+                        case Barcode.PRODUCT:
+                            cont_paquete.setText(barcode.rawValue);
+                            etiqueta = barcode.rawValue;
+                            Log.i(TAG, barcode.rawValue);
+                            break;
+                        case Barcode.SMS:
+                            cont_paquete.setText(barcode.sms.message);
+                            etiqueta = barcode.sms.message;
+                            Log.i(TAG, barcode.sms.message);
+                            break;
+                        case Barcode.TEXT:
+                            cont_paquete.setText(barcode.rawValue);
+                            etiqueta = barcode.rawValue;
+                            Log.i(TAG, barcode.rawValue);
+                            break;
+                        case Barcode.URL:
+                            cont_paquete.setText(barcode.url.url);
+                            etiqueta = barcode.url.url;
+                            Log.i(TAG, "url: " + barcode.url.url);
+                            break;
+                        case Barcode.WIFI:
+                            cont_paquete.setText(barcode.wifi.ssid);
+                            etiqueta = barcode.wifi.ssid;
+                            Log.i(TAG, barcode.wifi.ssid);
+                            break;
+                        case Barcode.GEO:
+                            cont_paquete.setText(barcode.geoPoint.lat + ":" + barcode.geoPoint.lng);
+                            etiqueta = barcode.geoPoint.lat + ":" + barcode.geoPoint.lng;
+                            Log.i(TAG, barcode.geoPoint.lat + ":" + barcode.geoPoint.lng);
+                            break;
+                        case Barcode.CALENDAR_EVENT:
+                            cont_paquete.setText(barcode.calendarEvent.description);
+                            etiqueta = barcode.calendarEvent.description;
+                            Log.i(TAG, barcode.calendarEvent.description);
+                            break;
+                        case Barcode.DRIVER_LICENSE:
+                            cont_paquete.setText(barcode.driverLicense.licenseNumber);
+                            etiqueta = barcode.driverLicense.licenseNumber;
+                            Log.i(TAG, barcode.driverLicense.licenseNumber);
+                            break;
+                        default:
+                            cont_paquete.setText(barcode.rawValue);
+                            etiqueta = barcode.rawValue;
+                            Log.i(TAG, barcode.rawValue);
+                            break;
+                    }
+                    System.out.println("SOUT CUATRO " + R.string.barcode_success);
+
+                    //Log.d(TAG, "Barcode read: " + barcode.displayValue);
+                } else {
+                    System.out.println("SOUT CINCO " + R.string.barcode_failure);
+                    Log.d(TAG, "No barcode captured, intent data is null");
+                }
+            } else {
+                System.out.println("SOUT SEIS " + String.format(getString(R.string.barcode_error),
+                        CommonStatusCodes.getStatusCodeString(resultCode)));
+            }
+        }
+        else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
 
 /*    private void initQR2() {
@@ -473,7 +595,7 @@ public class MainFragment extends Fragment {
 
 
 
-    @Override
+/*    @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
@@ -488,7 +610,7 @@ public class MainFragment extends Fragment {
             Toast.makeText(Objects.requireNonNull(getActivity()), "null ", Toast.LENGTH_LONG).show();
 
         }
-    }
+    }*/
 
     private boolean checkPermission() {
         int result = ContextCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), GET_ACCOUNTS);
