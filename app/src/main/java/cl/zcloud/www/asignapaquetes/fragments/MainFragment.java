@@ -50,6 +50,7 @@ import cl.zcloud.www.asignapaquetes.MainActivity;
 import cl.zcloud.www.asignapaquetes.R;
 import cl.zcloud.www.asignapaquetes.clases.CentroCosto;
 import cl.zcloud.www.asignapaquetes.clases.GSON.RespuestaCentroCosto;
+import cl.zcloud.www.asignapaquetes.clases.VerificarInternet;
 import cl.zcloud.www.asignapaquetes.clases.paquetesGuardados;
 import cl.zcloud.www.asignapaquetes.retrofit.APIService;
 import cl.zcloud.www.asignapaquetes.retrofit.RetrofitClient;
@@ -206,30 +207,6 @@ public class MainFragment extends Fragment {
         Intent intent = new Intent(getActivity(), BarcodeCaptureFragment.class);
         startActivityForResult(intent, RC_BARCODE_CAPTURE);
     }
-
-    /**
-     * Called when an activity you launched exits, giving you the requestCode
-     * you started it with, the resultCode it returned, and any additional
-     * data from it.  The <var>resultCode</var> will be
-     * {@link #RESULT_CANCELED} if the activity explicitly returned that,
-     * didn't return any result, or crashed during its operation.
-     * <p/>
-     * <p>You will receive this call immediately before onResume() when your
-     * activity is re-starting.
-     * <p/>
-     *
-     * @param requestCode The integer request code originally supplied to
-     *                    startActivityForResult(), allowing you to identify who this
-     *                    result came from.
-     * @param resultCode  The integer result code returned by the child activity
-     *                    through its setResult().
-     * @param data        An Intent, which can return result data to the caller
-     *                    (various data can be attached to Intent "extras").
-     * @see #startActivityForResult
-     * @see #createPendingResult
-     * @see #setResult(int)
-     */
-
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == RC_BARCODE_CAPTURE) {
@@ -242,87 +219,69 @@ public class MainFragment extends Fragment {
 
                     switch (type) {
                         case Barcode.CONTACT_INFO:
-                            Log.i(TAG, barcode.contactInfo.title);
                             Barcode.Email[] set = barcode.contactInfo.emails;
                             List<String> answers = new ArrayList<String>();
-                            for (int i = 0; i < set.length; i++){
-                                answers.add(set[i].address);
-
+                            for (Barcode.Email aSet : set) {
+                                answers.add(aSet.address);
                                 Toast.makeText(getActivity(), "emails " + answers, Toast.LENGTH_LONG).show();
                             }
-                            System.out.println("SOUT UNO " + barcode.contactInfo.organization);
-                            System.out.println("SOUT DOS " + barcode.contactInfo.title);
                             Barcode.PersonName name = barcode.contactInfo.name;
                             String contactName = name.first + " " + name.last;
-                            System.out.println("SOUT TRES " + contactName);
+                            cont_paquete.setText(contactName);
+                            etiqueta = barcode.email.address;
                             break;
                         case Barcode.EMAIL:
                             cont_paquete.setText(barcode.email.address);
                             etiqueta = barcode.email.address;
-                            Log.i(TAG, barcode.email.address);
                             break;
                         case Barcode.ISBN:
                             cont_paquete.setText(barcode.rawValue);
                             etiqueta = barcode.rawValue;
-                            Log.i(TAG, barcode.rawValue);
                             break;
                         case Barcode.PHONE:
                             cont_paquete.setText(barcode.phone.number);
                             etiqueta = barcode.phone.number;
-                            Log.i(TAG, barcode.phone.number);
                             break;
                         case Barcode.PRODUCT:
                             cont_paquete.setText(barcode.rawValue);
                             etiqueta = barcode.rawValue;
-                            Log.i(TAG, barcode.rawValue);
                             break;
                         case Barcode.SMS:
                             cont_paquete.setText(barcode.sms.message);
                             etiqueta = barcode.sms.message;
-                            Log.i(TAG, barcode.sms.message);
                             break;
                         case Barcode.TEXT:
                             cont_paquete.setText(barcode.rawValue);
                             etiqueta = barcode.rawValue;
-                            Log.i(TAG, barcode.rawValue);
                             break;
                         case Barcode.URL:
                             cont_paquete.setText(barcode.url.url);
                             etiqueta = barcode.url.url;
-                            Log.i(TAG, "url: " + barcode.url.url);
                             break;
                         case Barcode.WIFI:
                             cont_paquete.setText(barcode.wifi.ssid);
                             etiqueta = barcode.wifi.ssid;
-                            Log.i(TAG, barcode.wifi.ssid);
                             break;
                         case Barcode.GEO:
                             cont_paquete.setText(barcode.geoPoint.lat + ":" + barcode.geoPoint.lng);
                             etiqueta = barcode.geoPoint.lat + ":" + barcode.geoPoint.lng;
-                            Log.i(TAG, barcode.geoPoint.lat + ":" + barcode.geoPoint.lng);
                             break;
                         case Barcode.CALENDAR_EVENT:
                             cont_paquete.setText(barcode.calendarEvent.description);
                             etiqueta = barcode.calendarEvent.description;
-                            Log.i(TAG, barcode.calendarEvent.description);
                             break;
                         case Barcode.DRIVER_LICENSE:
                             cont_paquete.setText(barcode.driverLicense.licenseNumber);
                             etiqueta = barcode.driverLicense.licenseNumber;
-                            Log.i(TAG, barcode.driverLicense.licenseNumber);
                             break;
                         default:
                             cont_paquete.setText(barcode.rawValue);
                             etiqueta = barcode.rawValue;
-                            Log.i(TAG, barcode.rawValue);
                             break;
                     }
-                    System.out.println("SOUT CUATRO " + R.string.barcode_success);
-
-                    //Log.d(TAG, "Barcode read: " + barcode.displayValue);
+                    Toast.makeText(Objects.requireNonNull(getActivity()), R.string.barcode_success, Toast.LENGTH_SHORT).show();
                 } else {
-                    System.out.println("SOUT CINCO " + R.string.barcode_failure);
-                    Log.d(TAG, "No barcode captured, intent data is null");
+                    Toast.makeText(Objects.requireNonNull(getActivity()), R.string.barcode_failure, Toast.LENGTH_SHORT).show();
                 }
             } else {
                 System.out.println("SOUT SEIS " + String.format(getString(R.string.barcode_error),
@@ -333,181 +292,6 @@ public class MainFragment extends Fragment {
             super.onActivityResult(requestCode, resultCode, data);
         }
     }
-
-/*    private void initQR2() {
-        cameraSurface = new CameraSurface(Objects.requireNonNull(getActivity()).getBaseContext());
-        cameraSurface.setBarkodEditText(cont_paquete);
-    }*/
-
-    /*public class CameraSurface extends SurfaceView implements SurfaceHolder.Callback {
-        Context context;
-        Camera mCamera;
-        CameraSource cameraSource;
-        SurfaceHolder msurfaceHolder;
-        EditText etBarkod;
-
-        public CameraSurface(Context context) {
-            super(context);
-            super.setKeepScreenOn(true);
-            this.context = context;
-            RelativeLayout.LayoutParams params = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.MATCH_PARENT, RelativeLayout.LayoutParams.MATCH_PARENT);
-            super.setLayoutParams(params);
-            msurfaceHolder = this.getHolder();
-
-            msurfaceHolder.addCallback(this);
-            msurfaceHolder.setKeepScreenOn(true);
-            msurfaceHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
-            attachBarcodeDetector();
-        }
-
-        @Override
-        public void surfaceCreated(SurfaceHolder surfaceHolder) {
-
-            mCamera = Camera.open(Camera.CameraInfo.CAMERA_FACING_BACK);
-
-            try {
-                mCamera.setPreviewDisplay(msurfaceHolder);
-                mCamera.startPreview();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            Camera.Parameters param;
-            param = mCamera.getParameters();
-            param.setFocusMode(Camera.Parameters.FOCUS_MODE_CONTINUOUS_PICTURE);
-            param.setPreviewFrameRate(0);
-            param.setPreviewSize(176, 144);
-            mCamera.setParameters(param);
-            try {
-                //noinspection MissingPermission
-                if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED) {
-                    // TODO: Consider calling
-                    //    ActivityCompat#requestPermissions
-                    // here to request the missing permissions, and then overriding
-                    //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                    //                                          int[] grantResults)
-                    // to handle the case where the user grants the permission. See the documentation
-                    // for ActivityCompat#requestPermissions for more details.
-                    return;
-                }
-                cameraSource.start(msurfaceHolder);
-
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-        }
-        private void attachBarcodeDetector(){
-            BarcodeDetector barcodeDetector =
-                    new BarcodeDetector.Builder(context)
-                            .setBarcodeFormats(Barcode.ALL_FORMATS)
-                            .build();
-
-            cameraSource = new CameraSource
-                    .Builder(context, barcodeDetector)
-                    .setRequestedPreviewSize(176, 144)
-                    .setAutoFocusEnabled(true)
-                    .build();
-            barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
-                @Override
-                public void release() {
-
-                }
-
-                @Override
-                public void receiveDetections(Detector.Detections<Barcode> detections) {
-                    final EditText barkod= etBarkod;
-                    final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-                    if (barcodes.size() != 0) {
-                        barkod.post(new Runnable() {    // Use the post method of the TextView
-                            public void run() {
-                                barkod.setText(    // Update the TextView
-                                        barcodes.valueAt(0).displayValue
-                                );
-                            }
-                        });
-                    }
-                }
-            });
-        }
-
-        @Override
-        public void surfaceChanged(SurfaceHolder surfaceHolder, int i, int i1, int i2) {
-
-        }
-
-        @Override
-        public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-            cameraSource.stop();
-        }
-        public EditText setBarkodEditText(EditText editText){
-            return this.etBarkod = editText;
-        }
-    }*/
-
-/*    public void initQR(){
-        // creo el detector qr
-        BarcodeDetector barcodeDetector = new BarcodeDetector.Builder(getActivity())
-                .setBarcodeFormats(Barcode.QR_CODE)
-                .build();
-
-
-        // creo la camara fuente
-        cameraSource = new CameraSource
-                .Builder(Objects.requireNonNull(getActivity()), barcodeDetector)
-                .setRequestedPreviewSize(640, 480)
-                .build();
-
-        cameraView.getHolder().addCallback(new SurfaceHolder.Callback() {
-            @Override
-            public void surfaceCreated(SurfaceHolder holder) {
-                if (ContextCompat.checkSelfPermission(getActivity(), Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M){
-                        if (shouldShowRequestPermissionRationale(Manifest.permission.CAMERA))
-                            requestPermissions(new String[]{Manifest.permission.CAMERA}, MY_PERMISSIONS_REQUEST_CAMERA);
-                    }
-                    return;
-                }else{
-                    try{
-                        cameraSource.start(cameraView.getHolder());
-                    }catch(IOException e){
-                        Log.e("CAMERA SOURCE", e.getMessage());
-                    }
-                }
-            }
-
-            @Override
-            public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-
-            }
-
-            @Override
-            public void surfaceDestroyed(SurfaceHolder holder) {
-                cameraSource.stop();
-            }
-        });
-
-        barcodeDetector.setProcessor(new Detector.Processor<Barcode>() {
-            @Override
-            public void release() {
-
-            }
-
-            @Override
-            public void receiveDetections(Detector.Detections<Barcode> detections) {
-                final SparseArray<Barcode> barcodes = detections.getDetectedItems();
-
-                if (barcodes.size() > 0){
-                    token = barcodes.valueAt(0).displayValue;
-                    if(!token.equals(tokenanterior)){
-                        tokenanterior = token;
-                        Log.i("TOKEN", token);
-
-                    }
-                }
-            }
-        });
-    }*/
-
-
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
@@ -522,18 +306,18 @@ public class MainFragment extends Fragment {
             case R.id.upload:
                 return true;
             case R.id.download:
-//                VerificarInternet tarea = new VerificarInternet(getActivity(), new VerificarInternet.EntoncesHacer() {
-//                    @Override
-//                    public void cuandoHayInternet() {
+                VerificarInternet tarea = new VerificarInternet(getActivity(), new VerificarInternet.EntoncesHacer() {
+                    @Override
+                    public void cuandoHayInternet() {
                         new bajarDatos().execute();
-//                    }
+                    }
 
-//                    @Override
-//                    public void cuandoNOHayInternet() {
-//                        noInternet("Problemas", "No tiene acceso a internet");
-//                    }
-//                });
-//                tarea.execute();
+                    @Override
+                    public void cuandoNOHayInternet() {
+                        noInternet("Problemas", "No tiene acceso a internet");
+                    }
+                });
+                tarea.execute();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -556,7 +340,7 @@ public class MainFragment extends Fragment {
         editor.apply();
 
 
-        String estadoP = "";
+        String estadoP;
         if (spEstado.getSelectedItem().equals("Producción")){
             estadoP = "P";
         }else{

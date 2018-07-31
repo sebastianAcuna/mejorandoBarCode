@@ -413,6 +413,10 @@ public class BarcodeCaptureFragment  extends AppCompatActivity implements Barcod
 
     @Override
     public void onBarcodeDetected(Barcode barcode) {
+        Intent mIntent = new Intent();
+        mIntent.putExtra(BarcodeObject, barcode);
+        setResult(CommonStatusCodes.SUCCESS, mIntent);
+        finish();
         //do something with barcode data returned
     }
 }
